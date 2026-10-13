@@ -3,6 +3,7 @@ import cors from "cors";
 import authRoutes from "./routes/authRoutes.js";
 import { protect } from "./middleware/auth.js";
 import meetingRoutes from "./routes/meetingRoutes.js";
+import customerRoutes from "./routes/customerRoutes.js";
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(
 
 app.use(express.json());
 app.use("/api/meetings", meetingRoutes);
+app.use("/api/customers", customerRoutes);
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({
