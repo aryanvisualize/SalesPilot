@@ -4,6 +4,7 @@ import authRoutes from "./routes/authRoutes.js";
 import { protect } from "./middleware/auth.js";
 import meetingRoutes from "./routes/meetingRoutes.js";
 import customerRoutes from "./routes/customerRoutes.js";
+import meetingLifecycleRoutes from "./routes/meetingLifecycleRoutes.js";
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(
 app.use(express.json());
 app.use("/api/meetings", meetingRoutes);
 app.use("/api/customers", customerRoutes);
+app.use("/api/meetings", meetingLifecycleRoutes);
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({

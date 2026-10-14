@@ -1,6 +1,39 @@
 
 import mongoose from "mongoose";
 
+
+const visitSchema = new mongoose.Schema(
+  {
+    checkInAt: {
+      type: Date,
+      required: true,
+    },
+
+    checkOutAt: {
+      type: Date,
+      default: null,
+    },
+
+    checkInLocation: {
+      latitude: Number,
+      longitude: Number,
+    },
+
+    checkOutLocation: {
+      latitude: Number,
+      longitude: Number,
+    },
+
+    reasonForLeaving: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+  },
+  { _id: true }
+);
+
+
 const meetingSchema = new mongoose.Schema(
   {
     customer: {
@@ -47,6 +80,10 @@ const meetingSchema = new mongoose.Schema(
       type: String,
       trim: true,
       default: "",
+    },
+    visits: {
+      type: [visitSchema],
+      default: [],
     },
 
     status: {
