@@ -1,0 +1,121 @@
+import mongoose from "mongoose";
+import FollowUp from "../models/FollowUp.js";
+import Meeting from "../models/Meeting.js";
+import User from "../models/User.js";
+
+function ensureValidId(id) {
+  if (!mongoose.isValidObjectId(id)) {
+    throw new Error("INVALID_ID");
+  }
+}
+
+async function getAccessibleMeeting(id, currentUser) {
+  ensureValidId(id);
+
+  const meeting = await Meeting.findById(id);
+
+  if (!meeting) {
+    throw new Error("MEETING_NOT_FOUND");
+  }
+
+  if (
+    currentUser.role === "employee" &&
+    meeting.assignedTo.toString() !== currentUser._id.toString()
+  ) {
+    throw new Error("FORBIDDEN");
+  }
+
+  return meeting;
+}
+
+export async function createFollowUp(data, currentUser) {
+  const { meetingId, description, owner, dueDate } = data;
+
+  if (
+    typeof description !== "string" ||
+    !description.trim() ||
+    !mongoose.isValidObjectId(owner)
+  ) {
+    throw new Error("INVALID_FIELDS");
+  }
+
+  const due = new Date(dueDate);
+
+  if (!dueDate || Number.isNaN(due.getTime())) {
+    throw new Error("INVALID_DUE_DATE");
+  }
+
+  const meeting = await getAccessibleMeeting(meetingId, currentUser);
+
+  if (meeting.status !== "completed") {
+    throw new Error("MEETING_NOT_COMPLETED");
+  }
+
+  if (meeting.outcome !== "follow_up_required") {
+    throw new Error("FOLLOW_UP_NOT_REQUIRED");
+  }
+
+  const assignedUser = await User.findById(owner);
+
+  if (
+    !assignedUser ||
+    !["employee", "manager"].includes(assignedUser.role)
+  ) {
+    throw new Error("INVALID_OWNER");
+  }
+
+  if (
+    currentUser.role === "employee" &&
+    owner !== currentUser._id.toString()
+  ) {
+    throw new Error("FORBIDDEN");
+  }
+
+  return FollowUp.create({
+    meeting: meeting._id,
+    description: description.trim(),
+    owner: assignedUser._id,
+    createdBy: currentUser._id,
+    dueDate: due,
+  });
+}
+
+export async function listFollowUps(currentUser) {
+  const filter =
+    currentUser.role === "employee"
+      ? { owner: currentUser._id }
+      : {};
+
+  return FollowUp.find(filter)
+    .populate("meeting", "purpose scheduledStart status outcome")
+    .populate("owner", "name email role")
+    .sort({ dueDate: 1 });
+}
+
+export async function completeFollowUp(id, currentUser) {
+  ensureValidId(id);
+
+  const followUp = await FollowUp.findById(id);
+
+  if (!followUp) {
+    throw new Error("FOLLOW_UP_NOT_FOUND");
+  }
+
+  if (
+    currentUser.role === "employee" &&
+    followUp.owner.toString() !== currentUser._id.toString()
+  ) {
+    throw new Error("FORBIDDEN");
+  }
+
+  if (followUp.status === "completed") {
+    throw new Error("FOLLOW_UP_ALREADY_COMPLETED");
+  }
+
+  followUp.status = "completed";
+  followUp.completedAt = new Date();
+
+  await followUp.save();
+
+  return followUp;
+}
