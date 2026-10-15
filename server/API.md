@@ -79,7 +79,66 @@ All protected endpoints require an `Authorization` header formatted as:
 
 ---
 
-## 2. Customer APIs
+## 2. User Management APIs (Admin Only)
+
+### Create User
+- **Method:** `POST`
+- **Path:** `/api/users`
+- **Access:** Protected (Admin only)
+- **Request Body:**
+  ```json
+  {
+    "name": "Alex Morgan",
+    "email": "alex@salespilot.com",
+    "password": "Password123!",
+    "role": "employee",
+    "manager": "<manager_id>"
+  }
+  ```
+- **Response (201):**
+  ```json
+  {
+    "success": true,
+    "message": "User created successfully",
+    "user": {
+      "id": "67...",
+      "name": "Alex Morgan",
+      "email": "alex@salespilot.com",
+      "role": "employee",
+      "manager": "<manager_id>"
+    }
+  }
+  ```
+
+### List Users
+- **Method:** `GET`
+- **Path:** `/api/users`
+- **Access:** Protected (Admin only)
+- **Response (200):**
+  ```json
+  {
+    "success": true,
+    "count": 2,
+    "users": [
+      {
+        "_id": "67...",
+        "name": "Alex Morgan",
+        "email": "alex@salespilot.com",
+        "role": "employee",
+        "manager": {
+          "_id": "67...",
+          "name": "John Manager",
+          "email": "john@salespilot.com"
+        },
+        "createdAt": "..."
+      }
+    ]
+  }
+  ```
+
+---
+
+## 3. Customer APIs
 
 ### List Customers
 - **Method:** `GET`

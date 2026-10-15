@@ -83,7 +83,20 @@ JWT_EXPIRES_IN=1d
 
 Never commit real credentials to source control.
 
-### 4. Start the backend
+### 4. Create initial Admin account (Bootstrap)
+
+To securely bootstrap the first Admin user without exposing public admin registration endpoints:
+
+```bash
+cd server
+npm run create-admin <admin_email> <admin_password> "System Admin"
+```
+
+Alternatively, define `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `server/.env` and execute `npm run create-admin`.
+
+This script hashes the password with bcrypt, assigns the `admin` role, and ensures safe initialization. Once logged in, the Admin can use the **User Management** screen to create and manage Sales Employees and Sales Managers.
+
+### 5. Start the backend
 
 From the `server` directory:
 

@@ -7,6 +7,7 @@ import customerRoutes from "./routes/customerRoutes.js";
 import meetingLifecycleRoutes from "./routes/meetingLifecycleRoutes.js";
 import followUpRoutes from "./routes/followUpRoutes.js";
 import meetingAdminRoutes from "./routes/meetingAdminRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use("/api/customers", customerRoutes);
 app.use("/api/meetings", meetingLifecycleRoutes);
 app.use("/api/follow-ups", followUpRoutes);
 app.use("/api/meetings", meetingAdminRoutes);
+app.use("/api/users", userRoutes);
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({

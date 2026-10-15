@@ -4,6 +4,7 @@ import Dashboard from "./pages/Dashboard";
 import Meetings from "./pages/Meetings";
 import Customers from "./pages/Customers";
 import FollowUps from "./pages/FollowUps";
+import Users from "./pages/Users";
 import { apiRequest } from "./services/api";
 
 export default function App() {
@@ -59,6 +60,7 @@ export default function App() {
         style={{
           display: "flex",
           justifyContent: "center",
+          flexWrap: "wrap",
           gap: "12px",
           margin: "20px 0",
         }}
@@ -114,11 +116,31 @@ export default function App() {
         >
           Follow-ups
         </button>
+        {user.role === "admin" && (
+          <button
+            id="nav-users-btn"
+            type="button"
+            onClick={() => setActiveTab("users")}
+            style={{
+              padding: "8px 20px",
+              fontSize: "15px",
+              fontWeight: "600",
+              borderRadius: "6px",
+              border: "1px solid var(--border, #ccc)",
+              background: activeTab === "users" ? "var(--accent, #7c3aed)" : "var(--code-bg, #eee)",
+              color: activeTab === "users" ? "#fff" : "var(--text-h, #111)",
+              cursor: "pointer",
+            }}
+          >
+            User Management
+          </button>
+        )}
       </nav>
 
       {activeTab === "meetings" && <Meetings user={user} />}
       {activeTab === "customers" && <Customers user={user} />}
       {activeTab === "followups" && <FollowUps user={user} />}
+      {activeTab === "users" && user.role === "admin" && <Users user={user} />}
     </div>
   );
 }
