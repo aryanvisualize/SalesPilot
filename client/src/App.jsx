@@ -3,6 +3,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Meetings from "./pages/Meetings";
 import Customers from "./pages/Customers";
+import FollowUps from "./pages/FollowUps";
 import { apiRequest } from "./services/api";
 
 export default function App() {
@@ -96,13 +97,28 @@ export default function App() {
         >
           Customers
         </button>
+        <button
+          id="nav-followups-btn"
+          type="button"
+          onClick={() => setActiveTab("followups")}
+          style={{
+            padding: "8px 20px",
+            fontSize: "15px",
+            fontWeight: "600",
+            borderRadius: "6px",
+            border: "1px solid var(--border, #ccc)",
+            background: activeTab === "followups" ? "var(--accent, #7c3aed)" : "var(--code-bg, #eee)",
+            color: activeTab === "followups" ? "#fff" : "var(--text-h, #111)",
+            cursor: "pointer",
+          }}
+        >
+          Follow-ups
+        </button>
       </nav>
 
-      {activeTab === "meetings" ? (
-        <Meetings user={user} />
-      ) : (
-        <Customers user={user} />
-      )}
+      {activeTab === "meetings" && <Meetings user={user} />}
+      {activeTab === "customers" && <Customers user={user} />}
+      {activeTab === "followups" && <FollowUps user={user} />}
     </div>
   );
 }

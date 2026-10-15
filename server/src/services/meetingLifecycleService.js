@@ -26,6 +26,20 @@ async function getAssignedMeeting(id, currentUser) {
     throw new Error("FORBIDDEN");
   }
 
+  if (currentUser.role === "manager") {
+    const assignedEmployee = await User.findById(meeting.assignedTo).select("manager role");
+
+    const belongsToTeam =
+      meeting.assignedTo.toString() === currentUser._id.toString() ||
+      (assignedEmployee &&
+        assignedEmployee.role === "employee" &&
+        assignedEmployee.manager?.toString() === currentUser._id.toString());
+
+    if (!belongsToTeam) {
+      throw new Error("FORBIDDEN");
+    }
+  }
+
   return meeting;
 }
 
@@ -68,15 +82,6 @@ export async function confirmMeeting(id, currentUser) {
   }
 
   meeting.status = "confirmed";
-  console.log("CHECKOUT DEBUG - Before save:", {
-    status: meeting.status,
-    outcome: meeting.outcome,
-    lastVisitCheckOutAt: lastVisit.checkOutAt,
-  });
-  
-  if (followUpData) {
-    await FollowUp.create(followUpData);
-  }
 
   await meeting.save();
 
@@ -247,6 +252,10 @@ export async function checkOutMeeting(id, data, currentUser) {
   } else {
     meeting.status = "completed";
     meeting.outcome = outcome;
+  }
+
+  if (followUpData) {
+    await FollowUp.create(followUpData);
   }
 
   await meeting.save();

@@ -25,6 +25,19 @@ async function getAccessibleMeeting(id, currentUser) {
     throw new Error("FORBIDDEN");
   }
 
+  if (currentUser.role === "manager") {
+    const assignedEmployee = await User.findById(meeting.assignedTo).select("manager role");
+    const belongsToTeam =
+      meeting.assignedTo.toString() === currentUser._id.toString() ||
+      (assignedEmployee &&
+        assignedEmployee.role === "employee" &&
+        assignedEmployee.manager?.toString() === currentUser._id.toString());
+
+    if (!belongsToTeam) {
+      throw new Error("FORBIDDEN");
+    }
+  }
+
   return meeting;
 }
 
@@ -41,7 +54,7 @@ export async function createFollowUp(data, currentUser) {
 
   const due = new Date(dueDate);
 
-  if (!dueDate || Number.isNaN(due.getTime())) {
+  if (!dueDate || Number.isNaN(due.getTime()) || due <= new Date()) {
     throw new Error("INVALID_DUE_DATE");
   }
 
@@ -125,6 +138,19 @@ export async function completeFollowUp(id, currentUser) {
     followUp.owner.toString() !== currentUser._id.toString()
   ) {
     throw new Error("FORBIDDEN");
+  }
+
+  if (currentUser.role === "manager") {
+    const ownerUser = await User.findById(followUp.owner).select("manager role");
+    const belongsToTeam =
+      followUp.owner.toString() === currentUser._id.toString() ||
+      (ownerUser &&
+        ownerUser.role === "employee" &&
+        ownerUser.manager?.toString() === currentUser._id.toString());
+
+    if (!belongsToTeam) {
+      throw new Error("FORBIDDEN");
+    }
   }
 
   if (followUp.status === "completed") {
