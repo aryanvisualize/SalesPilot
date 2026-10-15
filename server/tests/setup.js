@@ -1,4 +1,4 @@
-
+process.env.JWT_SECRET = "test-secret";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { beforeAll, afterAll, beforeEach } from "vitest";
