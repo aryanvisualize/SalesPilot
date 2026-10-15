@@ -80,17 +80,36 @@ export async function createFollowUp(data, currentUser) {
   });
 }
 
+
 export async function listFollowUps(currentUser) {
-  const filter =
-    currentUser.role === "employee"
-      ? { owner: currentUser._id }
-      : {};
+  let filter = {};
+
+  if (currentUser.role === "employee") {
+    filter = { owner: currentUser._id };
+  } else if (currentUser.role === "manager") {
+    const teamMembers = await User.find({
+      manager: currentUser._id,
+      role: "employee",
+    }).select("_id");
+
+    const allowedIds = [
+      currentUser._id,
+      ...teamMembers.map((member) => member._id),
+    ];
+
+    filter = {
+      owner: { $in: allowedIds },
+    };
+  } else if (currentUser.role !== "admin") {
+    throw new Error("FORBIDDEN");
+  }
 
   return FollowUp.find(filter)
     .populate("meeting", "purpose scheduledStart status outcome")
     .populate("owner", "name email role")
     .sort({ dueDate: 1 });
 }
+
 
 export async function completeFollowUp(id, currentUser) {
   ensureValidId(id);

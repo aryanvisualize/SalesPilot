@@ -34,6 +34,34 @@ const visitSchema = new mongoose.Schema(
 );
 
 
+const reopenHistorySchema = new mongoose.Schema(
+  {
+    reopenedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
+    reopenedAt: {
+      type: Date,
+      required: true,
+    },
+
+    reason: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    previousOutcome: {
+      type: String,
+      default: null,
+    },
+  },
+  { _id: true }
+);
+
+
 const meetingSchema = new mongoose.Schema(
   {
     customer: {
@@ -109,6 +137,10 @@ const meetingSchema = new mongoose.Schema(
         "unable_to_meet",
       ],
       default: null,
+    },
+    reopenHistory: {
+      type: [reopenHistorySchema],
+      default: [],
     },
   },
   { timestamps: true }

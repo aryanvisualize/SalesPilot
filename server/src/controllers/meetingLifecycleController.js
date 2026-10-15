@@ -18,6 +18,9 @@ const errorMap = {
   OUTCOME_REQUIRED: [400, "A valid meeting outcome is required"],
   REASON_REQUIRED: [400, "A reason is required when pausing a meeting"],
   INVALID_FIELDS: [400, "Invalid request fields"],
+  FOLLOW_UP_REQUIRED: [400,"A follow-up description, owner, and due date are required",],
+  INVALID_DUE_DATE: [400, "Due date must be valid and in the future",],
+  INVALID_OWNER: [400, "Invalid follow-up owner",],
 };
 
 function handleError(error, res) {

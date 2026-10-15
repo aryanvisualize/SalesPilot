@@ -1,6 +1,8 @@
 
 import mongoose from "mongoose";
 import Meeting from "../models/Meeting.js";
+import User from "../models/User.js";
+import FollowUp from "../models/FollowUp.js";
 
 function ensureValidId(id) {
   if (!mongoose.isValidObjectId(id)) {
@@ -66,10 +68,20 @@ export async function confirmMeeting(id, currentUser) {
   }
 
   meeting.status = "confirmed";
+  console.log("CHECKOUT DEBUG - Before save:", {
+    status: meeting.status,
+    outcome: meeting.outcome,
+    lastVisitCheckOutAt: lastVisit.checkOutAt,
+  });
+  
+  if (followUpData) {
+    await FollowUp.create(followUpData);
+  }
 
   await meeting.save();
 
   return meeting;
+
 }
 
 export async function checkInMeeting(id, data, currentUser) {
@@ -122,6 +134,13 @@ export async function startMeeting(id, currentUser) {
 export async function checkOutMeeting(id, data, currentUser) {
   const meeting = await getAssignedMeeting(id, currentUser);
 
+  console.log("CHECKOUT DEBUG - Incoming request:", {
+    meetingId: id,
+    pause: data?.pause,
+    outcome: data?.outcome,
+    statusBefore: meeting.status,
+  });
+
   if (meeting.status !== "in_progress") {
     throw new Error("INVALID_TRANSITION");
   }
@@ -137,6 +156,7 @@ export async function checkOutMeeting(id, data, currentUser) {
   }
 
   let outcome;
+  let followUpData;
 
   if (!data.pause) {
     const allowedOutcomes = [
@@ -152,6 +172,56 @@ export async function checkOutMeeting(id, data, currentUser) {
     }
 
     outcome = data.outcome;
+
+    if (outcome === "follow_up_required") {
+      const followUp = data.followUp;
+
+      if (
+        !followUp ||
+        typeof followUp.description !== "string" ||
+        !followUp.description.trim() ||
+        !mongoose.isValidObjectId(followUp.owner)
+      ) {
+        throw new Error("FOLLOW_UP_REQUIRED");
+      }
+
+      const dueDate = new Date(followUp.dueDate);
+
+      if (
+        !followUp.dueDate ||
+        Number.isNaN(dueDate.getTime())
+      ) {
+        throw new Error("INVALID_DUE_DATE");
+      }
+
+      if (dueDate <= new Date()) {
+        throw new Error("INVALID_DUE_DATE");
+      }
+
+      const owner = await User.findById(followUp.owner);
+
+      if (
+        !owner ||
+        !["employee", "manager"].includes(owner.role)
+      ) {
+        throw new Error("INVALID_OWNER");
+      }
+
+      if (
+        currentUser.role === "employee" &&
+        owner._id.toString() !== currentUser._id.toString()
+      ) {
+        throw new Error("FORBIDDEN");
+      }
+
+      followUpData = {
+        meeting: meeting._id,
+        description: followUp.description.trim(),
+        owner: owner._id,
+        createdBy: currentUser._id,
+        dueDate,
+      };
+    }
   }
 
   const location = validateLocation(data.location);
