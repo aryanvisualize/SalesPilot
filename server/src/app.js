@@ -19,9 +19,9 @@ const configuredClients = (process.env.CLIENT_URL || "")
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "http://localhost:3000",
-  ...configuredClients,
-];
+  ...configuredClients.filter((url) => url !== "*"),
+  process.env.FRONTEND_URL?.trim().replace(/\/+$/, ""),
+].filter(Boolean);
 
 app.use(
   cors({
