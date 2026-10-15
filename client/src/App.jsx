@@ -1,35 +1,108 @@
 import { useEffect, useState } from "react";
-import { apiRequest } from "./services/api";
 import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import Meetings from "./pages/Meetings";
+import Customers from "./pages/Customers";
+import { apiRequest } from "./services/api";
 
-function App() {
-  const [apiStatus, setApiStatus] = useState("Checking...");
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [checkingSession, setCheckingSession] = useState(true);
+  const [activeTab, setActiveTab] = useState("meetings");
 
   useEffect(() => {
-    async function checkApiHealth() {
+    async function restoreSession() {
+      const token = localStorage.getItem("salespilot_token");
+
+      if (!token) {
+        setCheckingSession(false);
+        return;
+      }
+
       try {
-        const data = await apiRequest("/api/health");
-        setApiStatus(data.message);
-      } catch (error) {
-        setApiStatus("Backend connection failed");
-        console.error("Health check failed:", error);
+        const data = await apiRequest("/api/auth/me");
+        setUser(data.user || data.data?.user || data);
+      } catch {
+        localStorage.removeItem("salespilot_token");
+        setUser(null);
+      } finally {
+        setCheckingSession(false);
       }
     }
 
-    checkApiHealth();
+    restoreSession();
   }, []);
 
   function handleLogin(data) {
-    console.log("Login successful", data);
-    // Next step: store the user and show the dashboard.
+    setUser(data.user || data.data?.user || null);
+  }
+
+  function handleLogout() {
+    localStorage.removeItem("salespilot_token");
+    setUser(null);
+  }
+
+  if (checkingSession) {
+    return <p>Checking session...</p>;
+  }
+
+  if (!user) {
+    return <Login onLogin={handleLogin} />;
   }
 
   return (
-    <main>
-      <p>Backend status: {apiStatus}</p>
-      <Login onLogin={handleLogin} />
-    </main>
+    <div>
+      <Dashboard user={user} onLogout={handleLogout} />
+
+      <nav
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          gap: "12px",
+          margin: "20px 0",
+        }}
+      >
+        <button
+          id="nav-meetings-btn"
+          type="button"
+          onClick={() => setActiveTab("meetings")}
+          style={{
+            padding: "8px 20px",
+            fontSize: "15px",
+            fontWeight: "600",
+            borderRadius: "6px",
+            border: "1px solid var(--border, #ccc)",
+            background: activeTab === "meetings" ? "var(--accent, #7c3aed)" : "var(--code-bg, #eee)",
+            color: activeTab === "meetings" ? "#fff" : "var(--text-h, #111)",
+            cursor: "pointer",
+          }}
+        >
+          Meetings
+        </button>
+        <button
+          id="nav-customers-btn"
+          type="button"
+          onClick={() => setActiveTab("customers")}
+          style={{
+            padding: "8px 20px",
+            fontSize: "15px",
+            fontWeight: "600",
+            borderRadius: "6px",
+            border: "1px solid var(--border, #ccc)",
+            background: activeTab === "customers" ? "var(--accent, #7c3aed)" : "var(--code-bg, #eee)",
+            color: activeTab === "customers" ? "#fff" : "var(--text-h, #111)",
+            cursor: "pointer",
+          }}
+        >
+          Customers
+        </button>
+      </nav>
+
+      {activeTab === "meetings" ? (
+        <Meetings user={user} />
+      ) : (
+        <Customers user={user} />
+      )}
+    </div>
   );
 }
-
-export default App;
