@@ -57,12 +57,12 @@ export default function Login({ onLogin }) {
       }
 
       localStorage.setItem("salespilot_token", token);
-      
+
       // Clean up URL so dashboard displays on root "/"
       if (window.location.pathname !== "/") {
         window.history.replaceState(null, "", "/");
       }
-      
+
       onLogin(data);
     } catch (err) {
       setError(err.message || "Invalid email or password. Please try again.");
@@ -183,7 +183,7 @@ export default function Login({ onLogin }) {
               color: "var(--text-primary)",
             }}
           >
-            SalesPilot CRM
+            SalesPilot
           </h1>
           <p style={{ fontSize: "14px", color: "var(--text-muted)", margin: 0 }}>
             Sales Meeting & Visit Management System

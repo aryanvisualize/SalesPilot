@@ -370,7 +370,7 @@ All protected endpoints require an `Authorization` header formatted as:
 
 ### Health Check
 - **Method:** `GET`
-- **Path:** `/api/health`
+- **Path:** `/api/health` (also accessible at `/health`)
 - **Access:** Public
 - **Response (200):**
   ```json
