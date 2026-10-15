@@ -74,133 +74,90 @@ export default function CreateUser({ existingManagers = [], onUserCreated, onCan
     }
   }
 
-  const inputStyle = {
-    width: "100%",
-    padding: "8px 10px",
-    borderRadius: "6px",
-    border: "1px solid var(--border, #ccc)",
-    background: "var(--bg, #fff)",
-    color: "var(--text-h, #111)",
-    fontSize: "14px",
-    boxSizing: "border-box",
-  };
-
-  const labelStyle = {
-    display: "block",
-    fontWeight: "600",
-    marginBottom: "6px",
-    fontSize: "14px",
-    color: "var(--text-h, #111)",
-  };
-
   return (
-    <section
-      style={{
-        border: "1px solid var(--border, #ddd)",
-        borderRadius: "8px",
-        padding: "20px",
-        marginBottom: "24px",
-        textAlign: "left",
-        background: "var(--code-bg, #fcfcfc)",
-        maxWidth: "600px",
-        marginInline: "auto",
-        boxSizing: "border-box",
-      }}
-    >
-      <h2 style={{ marginTop: 0, marginBottom: "16px" }}>Create New User Account</h2>
+    <section className="crm-form-card">
+      <div style={{ marginBottom: "18px" }}>
+        <h2 style={{ fontSize: "18px", fontWeight: "700", color: "var(--text-primary)" }}>
+          Provision User Account
+        </h2>
+        <p style={{ fontSize: "13px", color: "var(--text-muted)", marginTop: "2px" }}>
+          Create credentials and assign organizational roles for your sales team.
+        </p>
+      </div>
 
       {error && (
-        <p
-          role="alert"
-          style={{
-            color: "#dc2626",
-            background: "rgba(220, 38, 38, 0.1)",
-            padding: "10px 12px",
-            borderRadius: "6px",
-            marginBottom: "14px",
-            fontSize: "14px",
-          }}
-        >
-          {error}
-        </p>
+        <div className="crm-alert crm-alert-error" role="alert">
+          <span>{error}</span>
+        </div>
       )}
 
       {success && (
-        <p
-          role="status"
-          style={{
-            color: "#16a34a",
-            background: "rgba(22, 163, 74, 0.1)",
-            padding: "10px 12px",
-            borderRadius: "6px",
-            marginBottom: "14px",
-            fontSize: "14px",
-          }}
-        >
-          {success}
-        </p>
+        <div className="crm-alert crm-alert-success" role="status">
+          <span>{success}</span>
+        </div>
       )}
 
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: "14px" }}>
-          <label htmlFor="user-name" style={labelStyle}>
+        <div className="crm-form-group">
+          <label htmlFor="user-name" className="crm-label">
             Full Name *
           </label>
           <input
             id="user-name"
             name="name"
             type="text"
+            className="crm-input"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Alex Morgan"
+            placeholder="Alex Morgan"
             required
             disabled={submitting}
-            style={inputStyle}
           />
         </div>
 
-        <div style={{ marginBottom: "14px" }}>
-          <label htmlFor="user-email" style={labelStyle}>
-            Email Address *
+        <div className="crm-form-group">
+          <label htmlFor="user-email" className="crm-label">
+            Work Email Address *
           </label>
           <input
             id="user-email"
             name="email"
             type="email"
+            className="crm-input"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="e.g. alex@salespilot.com"
+            placeholder="alex@salespilot.com"
             required
             disabled={submitting}
-            style={inputStyle}
           />
         </div>
 
-        <div style={{ marginBottom: "14px" }}>
-          <label htmlFor="user-password" style={labelStyle}>
-            Initial Password (min 8 chars) *
+        <div className="crm-form-group">
+          <label htmlFor="user-password" className="crm-label">
+            Initial Temporary Password (min 8 chars) *
           </label>
           <input
             id="user-password"
             name="password"
             type="password"
+            className="crm-input"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
             required
             minLength={8}
             disabled={submitting}
-            style={inputStyle}
           />
         </div>
 
-        <div style={{ marginBottom: "14px" }}>
-          <label htmlFor="user-role" style={labelStyle}>
-            Account Role *
+        <div className="crm-form-group">
+          <label htmlFor="user-role" className="crm-label">
+            Role & Access Level *
           </label>
           <select
             id="user-role"
             name="role"
+            className="crm-select"
             value={role}
             onChange={(e) => {
               setRole(e.target.value);
@@ -210,55 +167,45 @@ export default function CreateUser({ existingManagers = [], onUserCreated, onCan
             }}
             required
             disabled={submitting}
-            style={inputStyle}
           >
-            <option value="employee">Sales Employee</option>
-            <option value="manager">Sales Manager</option>
+            <option value="employee">Sales Representative (Employee)</option>
+            <option value="manager">Sales Manager (Lead)</option>
           </select>
         </div>
 
         {role === "employee" && (
-          <div style={{ marginBottom: "14px" }}>
-            <label htmlFor="user-manager" style={labelStyle}>
-              Assigned Manager (Optional)
+          <div className="crm-form-group">
+            <label htmlFor="user-manager" className="crm-label">
+              Assigned Sales Manager (Optional)
             </label>
             <select
               id="user-manager"
               name="manager"
+              className="crm-select"
               value={manager}
               onChange={(e) => setManager(e.target.value)}
               disabled={submitting}
-              style={inputStyle}
             >
-              <option value="">-- No Assigned Manager --</option>
+              <option value="">-- No Assigned Manager (Self-directed) --</option>
               {existingManagers.map((m) => (
                 <option key={m.id || m._id} value={m.id || m._id}>
                   {m.name} ({m.email})
                 </option>
               ))}
             </select>
-            <span style={{ fontSize: "12px", color: "var(--text, #777)", marginTop: "4px", display: "block" }}>
-              Employees can be assigned to a manager to enable team oversight.
+            <span style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "4px", display: "block" }}>
+              Assigning a manager grants that manager visibility into this employee&apos;s meetings and follow-ups.
             </span>
           </div>
         )}
 
-        <div style={{ display: "flex", gap: "10px", marginTop: "18px" }}>
+        <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
           <button
             type="submit"
             disabled={submitting}
-            style={{
-              padding: "9px 18px",
-              borderRadius: "6px",
-              border: "none",
-              background: "var(--accent, #7c3aed)",
-              color: "#fff",
-              fontWeight: "600",
-              cursor: submitting ? "not-allowed" : "pointer",
-              opacity: submitting ? 0.7 : 1,
-            }}
+            className="crm-btn crm-btn-primary"
           >
-            {submitting ? "Creating user..." : "Create User"}
+            {submitting ? "Provisioning..." : "Provision Account"}
           </button>
 
           {onCancel && (
@@ -266,14 +213,7 @@ export default function CreateUser({ existingManagers = [], onUserCreated, onCan
               type="button"
               onClick={onCancel}
               disabled={submitting}
-              style={{
-                padding: "9px 18px",
-                borderRadius: "6px",
-                border: "1px solid var(--border, #ccc)",
-                background: "transparent",
-                color: "var(--text, #555)",
-                cursor: submitting ? "not-allowed" : "pointer",
-              }}
+              className="crm-btn crm-btn-secondary"
             >
               Cancel
             </button>

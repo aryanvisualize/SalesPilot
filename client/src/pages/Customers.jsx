@@ -45,45 +45,60 @@ export default function Customers() {
     };
   }, [refreshKey]);
 
-  if (loading) return <p>Loading customers...</p>;
+  if (loading) {
+    return (
+      <div className="crm-empty-state">
+        <div className="crm-empty-icon">⏳</div>
+        <div className="crm-empty-title">Loading customer accounts...</div>
+        <div className="crm-empty-desc">Fetching client directories and contact points from SalesPilot.</div>
+      </div>
+    );
+  }
 
   if (error) {
     return (
       <section>
-        <h2>Customers</h2>
-        <p role="alert">{error}</p>
-        <button onClick={() => setRefreshKey((k) => k + 1)}>Try again</button>
+        <div className="crm-page-header">
+          <div>
+            <h1 className="crm-page-title">Customer Accounts</h1>
+            <p className="crm-page-subtitle">Directory of registered client accounts</p>
+          </div>
+        </div>
+        <div className="crm-alert crm-alert-error" role="alert">
+          <span>{error}</span>
+        </div>
+        <button className="crm-btn crm-btn-secondary" onClick={() => setRefreshKey((k) => k + 1)}>
+          Try again
+        </button>
       </section>
     );
   }
 
   return (
-    <main>
-      <h1>Customers</h1>
+    <div>
+      {/* Header */}
+      <div className="crm-page-header">
+        <div>
+          <h1 className="crm-page-title">Customer Accounts</h1>
+          <p className="crm-page-subtitle">
+            Manage your client directory, primary points of contact, and business locations.
+          </p>
+        </div>
 
-      <div style={{ marginBottom: "20px" }}>
         <button
           id="toggle-create-customer-btn"
           type="button"
           onClick={() => setShowCreateForm((prev) => !prev)}
-          style={{
-            padding: "8px 16px",
-            fontSize: "14px",
-            cursor: "pointer",
-            borderRadius: "6px",
-            border: "1px solid var(--border, #ccc)",
-            background: showCreateForm ? "var(--code-bg, #eee)" : "var(--accent-bg, #f3e8ff)",
-            color: "var(--text-h, #111)",
-            fontWeight: "600",
-          }}
+          className={`crm-btn ${showCreateForm ? "crm-btn-secondary" : "crm-btn-primary"}`}
         >
-          {showCreateForm ? "Cancel" : "+ Add Customer"}
+          {showCreateForm ? "Cancel" : "+ Add Customer Account"}
         </button>
       </div>
 
       {showCreateForm && (
         <CreateCustomer
           onCustomerCreated={() => {
+            setShowCreateForm(false);
             setRefreshKey((k) => k + 1);
           }}
           onCancel={() => setShowCreateForm(false)}
@@ -91,50 +106,89 @@ export default function Customers() {
       )}
 
       {customers.length === 0 ? (
-        <p>No customers found. Click &quot;+ Add Customer&quot; to create your first customer.</p>
+        <div className="crm-empty-state">
+          <div className="crm-empty-icon">🏢</div>
+          <div className="crm-empty-title">No customer accounts registered</div>
+          <div className="crm-empty-desc">
+            Your customer directory is empty. Click &quot;+ Add Customer Account&quot; to add your first company record.
+          </div>
+        </div>
       ) : (
-        <div>
-          {customers.map((c) => (
-            <article
-              key={c._id}
-              style={{
-                border: "1px solid var(--border, #ddd)",
-                borderRadius: "8px",
-                padding: "16px",
-                marginBottom: "12px",
-                textAlign: "left",
-                background: "var(--bg, #fff)",
-              }}
-            >
-              <h3 style={{ marginTop: 0, marginBottom: "8px", color: "var(--text-h, #111)" }}>
-                {c.accountName}
-              </h3>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
+            gap: "16px",
+          }}
+        >
+          {customers.map((c) => {
+            const initials = c.accountName
+              ? c.accountName.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()
+              : "AC";
 
-              <p style={{ margin: "4px 0" }}>
-                <strong>Contact Person:</strong> {c.contactPerson}
-              </p>
+            return (
+              <article key={c._id} className="crm-record-card" style={{ marginBottom: 0 }}>
+                <div className="crm-record-top">
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <div
+                      style={{
+                        width: "42px",
+                        height: "42px",
+                        borderRadius: "var(--radius-md)",
+                        background: "linear-gradient(135deg, #0284c7 0%, #38bdf8 100%)",
+                        color: "#fff",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontWeight: "700",
+                        fontSize: "14px",
+                        boxShadow: "0 2px 6px rgba(2, 132, 199, 0.25)",
+                      }}
+                    >
+                      {initials}
+                    </div>
+                    <div>
+                      <h3 className="crm-record-title">{c.accountName}</h3>
+                      <p style={{ fontSize: "12.5px", color: "var(--text-muted)" }}>
+                        ID: <code style={{ fontSize: "11px" }}>{c._id}</code>
+                      </p>
+                    </div>
+                  </div>
+                  <span className="crm-status-pill crm-status-confirmed">Verified</span>
+                </div>
 
-              {c.email && (
-                <p style={{ margin: "4px 0" }}>
-                  <strong>Email:</strong> {c.email}
-                </p>
-              )}
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "14px", fontSize: "13.5px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ color: "var(--text-muted)" }}>👤 Contact:</span>
+                    <strong style={{ color: "var(--text-primary)" }}>{c.contactPerson}</strong>
+                  </div>
 
-              {c.phone && (
-                <p style={{ margin: "4px 0" }}>
-                  <strong>Phone:</strong> {c.phone}
-                </p>
-              )}
+                  {c.email && (
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span style={{ color: "var(--text-muted)" }}>✉️ Email:</span>
+                      <a href={`mailto:${c.email}`} style={{ color: "var(--primary)" }}>{c.email}</a>
+                    </div>
+                  )}
 
-              {c.address && (
-                <p style={{ margin: "4px 0" }}>
-                  <strong>Address:</strong> {c.address}
-                </p>
-              )}
-            </article>
-          ))}
+                  {c.phone && (
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span style={{ color: "var(--text-muted)" }}>📞 Phone:</span>
+                      <span style={{ color: "var(--text-secondary)" }}>{c.phone}</span>
+                    </div>
+                  )}
+
+                  {c.address && (
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", marginTop: "2px" }}>
+                      <span style={{ color: "var(--text-muted)" }}>📍 Address:</span>
+                      <span style={{ color: "var(--text-secondary)" }}>{c.address}</span>
+                    </div>
+                  )}
+                </div>
+              </article>
+            );
+          })}
         </div>
       )}
-    </main>
+    </div>
   );
 }

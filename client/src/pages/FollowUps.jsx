@@ -68,62 +68,68 @@ export default function FollowUps({ user }) {
     }
   }
 
-  if (loading) return <p>Loading follow-ups...</p>;
+  if (loading) {
+    return (
+      <div className="crm-empty-state">
+        <div className="crm-empty-icon">⏳</div>
+        <div className="crm-empty-title">Loading follow-up tasks...</div>
+        <div className="crm-empty-desc">Fetching action items linked to your customer meetings.</div>
+      </div>
+    );
+  }
 
   if (error) {
     return (
       <section>
-        <h2>Follow-ups</h2>
-        <p role="alert">{error}</p>
-        <button onClick={() => setRefreshKey((k) => k + 1)}>Try again</button>
+        <div className="crm-page-header">
+          <div>
+            <h1 className="crm-page-title">Follow-up Tasks</h1>
+            <p className="crm-page-subtitle">Track deliverables and action items</p>
+          </div>
+        </div>
+        <div className="crm-alert crm-alert-error" role="alert">
+          <span>{error}</span>
+        </div>
+        <button className="crm-btn crm-btn-secondary" onClick={() => setRefreshKey((k) => k + 1)}>
+          Try again
+        </button>
       </section>
     );
   }
 
   return (
-    <main>
-      <h1>Follow-ups</h1>
+    <div>
+      <div className="crm-page-header">
+        <div>
+          <h1 className="crm-page-title">Follow-up Management</h1>
+          <p className="crm-page-subtitle">
+            Track commitments made during customer visits and mark deliverables completed.
+          </p>
+        </div>
+      </div>
 
       {actionError && (
-        <p
-          role="alert"
-          style={{
-            color: "#dc2626",
-            background: "rgba(220, 38, 38, 0.1)",
-            padding: "10px 12px",
-            borderRadius: "6px",
-            marginBottom: "16px",
-            fontSize: "14px",
-            maxWidth: "600px",
-            marginInline: "auto",
-          }}
-        >
-          {actionError}
-        </p>
+        <div className="crm-alert crm-alert-error" role="alert">
+          <span>{actionError}</span>
+        </div>
       )}
 
       {actionSuccess && (
-        <p
-          role="status"
-          style={{
-            color: "#16a34a",
-            background: "rgba(22, 163, 74, 0.1)",
-            padding: "10px 12px",
-            borderRadius: "6px",
-            marginBottom: "16px",
-            fontSize: "14px",
-            maxWidth: "600px",
-            marginInline: "auto",
-          }}
-        >
-          {actionSuccess}
-        </p>
+        <div className="crm-alert crm-alert-success" role="status">
+          <span>{actionSuccess}</span>
+        </div>
       )}
 
       {followUps.length === 0 ? (
-        <p>No follow-ups found.</p>
+        <div className="crm-empty-state">
+          <div className="crm-empty-icon">⏱️</div>
+          <div className="crm-empty-title">No pending follow-ups</div>
+          <div className="crm-empty-desc">
+            All action items and commitments are up to date! Follow-ups are automatically scheduled when meetings conclude with a &quot;Follow-up Required&quot; outcome.
+          </div>
+        </div>
       ) : (
-        <div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           {followUps.map((fu) => {
             const ownerId = fu.owner?._id || fu.owner;
             const isOwner =
@@ -133,84 +139,83 @@ export default function FollowUps({ user }) {
             const isBusy = completingId === fu._id;
 
             return (
-              <article
-                key={fu._id}
-                style={{
-                  border: "1px solid var(--border, #ddd)",
-                  borderRadius: "8px",
-                  padding: "16px",
-                  marginBottom: "12px",
-                  textAlign: "left",
-                  background: "var(--bg, #fff)",
-                }}
-              >
-                <h3 style={{ marginTop: 0, marginBottom: "8px", color: "var(--text-h, #111)" }}>
-                  {fu.description}
-                </h3>
+              <article key={fu._id} className="crm-record-card">
+                <div className="crm-record-top">
+                  <div>
+                    <h3 className="crm-record-title">{fu.description}</h3>
+                    <p style={{ fontSize: "12.5px", color: "var(--text-muted)", marginTop: "2px" }}>
+                      Task ID: <code style={{ fontSize: "11px" }}>{fu._id}</code>
+                    </p>
+                  </div>
 
-                {fu.meeting && (
-                  <p style={{ margin: "4px 0" }}>
-                    <strong>Linked Meeting:</strong> {fu.meeting.purpose || "Meeting"}
-                    {fu.meeting.scheduledStart
-                      ? ` (${new Date(fu.meeting.scheduledStart).toLocaleDateString()})`
-                      : ""}
-                  </p>
-                )}
-
-                <p style={{ margin: "4px 0" }}>
-                  <strong>Assigned Owner:</strong>{" "}
-                  {fu.owner?.name
-                    ? `${fu.owner.name}${isOwner ? " (You)" : ""}`
-                    : fu.owner?.email || "Unknown"}
-                </p>
-
-                <p style={{ margin: "4px 0" }}>
-                  <strong>Due Date:</strong>{" "}
-                  {fu.dueDate ? new Date(fu.dueDate).toLocaleString() : "Not specified"}
-                </p>
-
-                <p style={{ margin: "4px 0" }}>
-                  <strong>Status:</strong>{" "}
                   <span
-                    style={{
-                      display: "inline-block",
-                      padding: "2px 8px",
-                      borderRadius: "4px",
-                      fontSize: "12px",
-                      fontWeight: "600",
-                      background: isCompleted ? "rgba(22, 163, 74, 0.15)" : "rgba(234, 179, 8, 0.15)",
-                      color: isCompleted ? "#16a34a" : "#ca8a04",
-                    }}
+                    className={`crm-status-pill ${
+                      isCompleted ? "crm-status-completed" : "crm-status-in_progress"
+                    }`}
                   >
-                    {isCompleted ? "Completed" : "Pending"}
+                    ● {isCompleted ? "Completed" : "Pending Action"}
                   </span>
-                </p>
+                </div>
 
-                {isCompleted && fu.completedAt && (
-                  <p style={{ margin: "4px 0", fontSize: "13px", color: "var(--text, #666)" }}>
-                    <strong>Completed At:</strong> {new Date(fu.completedAt).toLocaleString()}
-                  </p>
-                )}
+                <div className="crm-meta-grid">
+                  {fu.meeting && (
+                    <div className="crm-meta-item">
+                      <span className="crm-meta-icon">📅</span>
+                      <div>
+                        <strong>Meeting:</strong>{" "}
+                        <span>
+                          {fu.meeting.purpose || "Customer Meeting"}
+                          {fu.meeting.scheduledStart
+                            ? ` (${new Date(fu.meeting.scheduledStart).toLocaleDateString()})`
+                            : ""}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="crm-meta-item">
+                    <span className="crm-meta-icon">👤</span>
+                    <div>
+                      <strong>Assigned Rep:</strong>{" "}
+                      <span>
+                        {fu.owner?.name
+                          ? `${fu.owner.name}${isOwner ? " (You)" : ""}`
+                          : fu.owner?.email || "Unknown"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="crm-meta-item">
+                    <span className="crm-meta-icon">⏰</span>
+                    <div>
+                      <strong>Due Date:</strong>{" "}
+                      <span>
+                        {fu.dueDate ? new Date(fu.dueDate).toLocaleString() : "Not specified"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {isCompleted && fu.completedAt && (
+                    <div className="crm-meta-item">
+                      <span className="crm-meta-icon">✅</span>
+                      <div>
+                        <strong>Completed On:</strong>{" "}
+                        <span>{new Date(fu.completedAt).toLocaleString()}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 {!isCompleted && canComplete && (
-                  <div style={{ marginTop: "12px", paddingTop: "10px", borderTop: "1px solid var(--border, #eee)" }}>
+                  <div style={{ marginTop: "14px", paddingTop: "12px", borderTop: "1px solid var(--border-subtle)" }}>
                     <button
                       type="button"
                       disabled={isBusy}
                       onClick={() => handleCompleteFollowUp(fu._id)}
-                      style={{
-                        padding: "6px 14px",
-                        fontSize: "13px",
-                        fontWeight: "600",
-                        borderRadius: "6px",
-                        border: "none",
-                        background: "var(--accent, #7c3aed)",
-                        color: "#fff",
-                        cursor: isBusy ? "not-allowed" : "pointer",
-                        opacity: isBusy ? 0.7 : 1,
-                      }}
+                      className="crm-btn crm-btn-primary"
+                      style={{ fontSize: "12.5px", padding: "6px 14px" }}
                     >
-                      {isBusy ? "Marking complete..." : "Mark as Completed"}
+                      {isBusy ? "Marking complete..." : "✓ Mark as Completed"}
                     </button>
                   </div>
                 )}
@@ -219,6 +224,6 @@ export default function FollowUps({ user }) {
           })}
         </div>
       )}
-    </main>
+    </div>
   );
 }

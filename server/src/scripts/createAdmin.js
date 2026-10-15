@@ -30,10 +30,10 @@ async function bootstrapAdmin() {
     process.exit(1);
   }
 
-  const mongoUri = process.env.MONGODB_URI;
+  const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
 
   if (!mongoUri) {
-    console.error("Error: MONGODB_URI is not defined in environment.");
+    console.error("Error: MONGO_URI or MONGODB_URI is not defined in environment.");
     process.exit(1);
   }
 

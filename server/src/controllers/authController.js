@@ -18,7 +18,7 @@ function createToken(user) {
 
 export async function register(req, res) {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
     if (
       typeof name !== "string" ||
@@ -49,11 +49,13 @@ export async function register(req, res) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    const assignedRole = role === "manager" ? "manager" : "employee";
+
     const user = await User.create({
       name: name.trim(),
       email: normalizedEmail,
       password: hashedPassword,
-      role: "employee",
+      role: assignedRole,
     });
 
     const token = createToken(user);

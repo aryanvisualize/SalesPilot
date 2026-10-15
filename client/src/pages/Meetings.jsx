@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { apiRequest } from "../services/api";
 import CreateMeeting from "../components/CreateMeeting";
@@ -9,7 +8,6 @@ export default function Meetings({ user }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
-
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -19,7 +17,6 @@ export default function Meetings({ user }) {
       try {
         const data = await apiRequest("/api/meetings");
 
-        // Support common API response formats.
         const records = Array.isArray(data)
           ? data
           : data.meetings || data.data?.meetings || data.data || [];
@@ -49,14 +46,29 @@ export default function Meetings({ user }) {
     };
   }, [refreshKey]);
 
-  if (loading) return <p>Loading meetings...</p>;
+  if (loading) {
+    return (
+      <div className="crm-empty-state">
+        <div className="crm-empty-icon">⏳</div>
+        <div className="crm-empty-title">Loading meetings...</div>
+        <div className="crm-empty-desc">Fetching customer meetings and visit logs from SalesPilot server.</div>
+      </div>
+    );
+  }
 
   if (error) {
     return (
       <section>
-        <h2>Meetings</h2>
-        <p role="alert">{error}</p>
-        <button onClick={() => window.location.reload()}>
+        <div className="crm-page-header">
+          <div>
+            <h1 className="crm-page-title">Meetings</h1>
+            <p className="crm-page-subtitle">Schedule, track, and complete sales meetings</p>
+          </div>
+        </div>
+        <div className="crm-alert crm-alert-error" role="alert">
+          <span>{error}</span>
+        </div>
+        <button className="crm-btn crm-btn-secondary" onClick={() => window.location.reload()}>
           Try again
         </button>
       </section>
@@ -64,26 +76,23 @@ export default function Meetings({ user }) {
   }
 
   return (
-    <main>
-      <h1>Meetings</h1>
+    <div>
+      {/* Page Header */}
+      <div className="crm-page-header">
+        <div>
+          <h1 className="crm-page-title">Meetings & Visits</h1>
+          <p className="crm-page-subtitle">
+            Manage your schedule, perform customer check-ins, and record visit outcomes.
+          </p>
+        </div>
 
-      <div style={{ marginBottom: "20px" }}>
         <button
           id="toggle-create-meeting-btn"
           type="button"
           onClick={() => setShowCreateForm((prev) => !prev)}
-          style={{
-            padding: "8px 16px",
-            fontSize: "14px",
-            cursor: "pointer",
-            borderRadius: "6px",
-            border: "1px solid var(--border, #ccc)",
-            background: showCreateForm ? "var(--code-bg, #eee)" : "var(--accent-bg, #f3e8ff)",
-            color: "var(--text-h, #111)",
-            fontWeight: "600",
-          }}
+          className={`crm-btn ${showCreateForm ? "crm-btn-secondary" : "crm-btn-primary"}`}
         >
-          {showCreateForm ? "Cancel" : "+ Create Meeting"}
+          {showCreateForm ? "Cancel" : "+ Schedule Meeting"}
         </button>
       </div>
 
@@ -91,6 +100,7 @@ export default function Meetings({ user }) {
         <CreateMeeting
           user={user}
           onMeetingCreated={() => {
+            setShowCreateForm(false);
             setRefreshKey((k) => k + 1);
           }}
           onCancel={() => setShowCreateForm(false)}
@@ -98,87 +108,151 @@ export default function Meetings({ user }) {
       )}
 
       {meetings.length === 0 ? (
-        <p>No meetings found. Create your first meeting to get started.</p>
+        <div className="crm-empty-state">
+          <div className="crm-empty-icon">📅</div>
+          <div className="crm-empty-title">No meetings scheduled yet</div>
+          <div className="crm-empty-desc">
+            You don't have any scheduled sales visits in your pipeline. Click &quot;+ Schedule Meeting&quot; above to create one.
+          </div>
+        </div>
       ) : (
-        <div>
-          {meetings.map((meeting) => (
-            <article
-              key={meeting._id}
-              style={{
-                border: "1px solid #ddd",
-                borderRadius: "8px",
-                padding: "16px",
-                marginBottom: "12px",
-              }}
-            >
-              <h3>{meeting.purpose || "Meeting"}</h3>
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          {meetings.map((meeting) => {
+            const statusClass = `crm-status-${meeting.status || "scheduled"}`;
+            const displayStatus = (meeting.status || "scheduled").replaceAll("_", " ");
 
-              <p>
-                <strong>Customer:</strong>{" "}
-                {meeting.customer?.accountName || "Unknown customer"}
-              </p>
+            return (
+              <article key={meeting._id} className="crm-record-card">
+                <div className="crm-record-top">
+                  <div>
+                    <h3 className="crm-record-title">{meeting.purpose || "Customer Meeting"}</h3>
+                    <p style={{ fontSize: "13px", color: "var(--text-muted)", marginTop: "2px" }}>
+                      Meeting ID: <code style={{ fontSize: "12px" }}>{meeting._id}</code>
+                    </p>
+                  </div>
+                  <span className={`crm-status-pill ${statusClass}`}>
+                    ● {displayStatus}
+                  </span>
+                </div>
 
-              <p>
-                <strong>Start:</strong>{" "}
-                {meeting.scheduledStart
-                  ? new Date(meeting.scheduledStart).toLocaleString()
-                  : "Not specified"}
-              </p>
+                <div className="crm-meta-grid">
+                  <div className="crm-meta-item">
+                    <span className="crm-meta-icon">🏢</span>
+                    <div>
+                      <strong>Customer:</strong>{" "}
+                      <span>{meeting.customer?.accountName || "Unknown customer"}</span>
+                    </div>
+                  </div>
 
-              <p>
-                <strong>End:</strong>{" "}
-                {meeting.scheduledEnd
-                  ? new Date(meeting.scheduledEnd).toLocaleString()
-                  : "Not specified"}
-              </p>
+                  <div className="crm-meta-item">
+                    <span className="crm-meta-icon">👤</span>
+                    <div>
+                      <strong>Assigned to:</strong>{" "}
+                      <span>{meeting.assignedTo?.name || meeting.assignedTo?.email || "Unassigned"}</span>
+                    </div>
+                  </div>
 
-              <p>
-                <strong>Assigned to:</strong>{" "}
-                {meeting.assignedTo?.name ||
-                  meeting.assignedTo?.email ||
-                  "Not available"}
-              </p>
+                  <div className="crm-meta-item">
+                    <span className="crm-meta-icon">🕒</span>
+                    <div>
+                      <strong>Start:</strong>{" "}
+                      <span>
+                        {meeting.scheduledStart
+                          ? new Date(meeting.scheduledStart).toLocaleString([], {
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : "Not set"}
+                      </span>
+                    </div>
+                  </div>
 
-              <p>
-                <strong>Status:</strong>{" "}
-                {(meeting.status || "unknown").replaceAll("_", " ")}
-              </p>
+                  <div className="crm-meta-item">
+                    <span className="crm-meta-icon">🏁</span>
+                    <div>
+                      <strong>End:</strong>{" "}
+                      <span>
+                        {meeting.scheduledEnd
+                          ? new Date(meeting.scheduledEnd).toLocaleString([], {
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : "Not set"}
+                      </span>
+                    </div>
+                  </div>
 
-              {meeting.location && (
-                <p>
-                  <strong>Location:</strong> {meeting.location}
-                </p>
-              )}
+                  {meeting.location && (
+                    <div className="crm-meta-item">
+                      <span className="crm-meta-icon">📍</span>
+                      <div>
+                        <strong>Location:</strong> <span>{meeting.location}</span>
+                      </div>
+                    </div>
+                  )}
 
-              {meeting.outcome && (
-                <p>
-                  <strong>Outcome:</strong> {meeting.outcome.replaceAll("_", " ")}
-                </p>
-              )}
+                  {meeting.outcome && (
+                    <div className="crm-meta-item">
+                      <span className="crm-meta-icon">🎯</span>
+                      <div>
+                        <strong>Outcome:</strong>{" "}
+                        <span style={{ textTransform: "capitalize", fontWeight: "600", color: "var(--primary)" }}>
+                          {meeting.outcome.replaceAll("_", " ")}
+                        </span>
+                      </div>
+                    </div>
+                  )}
 
-              {meeting.visits?.length > 0 && (
-                <p>
-                  <strong>Visits:</strong> {meeting.visits.length} recorded
-                </p>
-              )}
+                  {meeting.visits?.length > 0 && (
+                    <div className="crm-meta-item">
+                      <span className="crm-meta-icon">⏱️</span>
+                      <div>
+                        <strong>Visits:</strong> <span>{meeting.visits.length} recorded</span>
+                      </div>
+                    </div>
+                  )}
 
-              {meeting.reopenHistory?.length > 0 && (
-                <p>
-                  <strong>Reopened:</strong> {meeting.reopenHistory.length} time(s)
-                </p>
-              )}
+                  {meeting.reopenHistory?.length > 0 && (
+                    <div className="crm-meta-item">
+                      <span className="crm-meta-icon">🔄</span>
+                      <div>
+                        <strong>Reopened:</strong> <span>{meeting.reopenHistory.length} time(s)</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
-              <MeetingActions
-                meeting={meeting}
-                user={user}
-                onMeetingUpdated={() => {
-                  setRefreshKey((k) => k + 1);
-                }}
-              />
-            </article>
-          ))}
+                {meeting.notes && (
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      color: "var(--text-secondary)",
+                      background: "var(--bg-subtle)",
+                      padding: "8px 12px",
+                      borderRadius: "var(--radius-sm)",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    <strong>Notes:</strong> {meeting.notes}
+                  </div>
+                )}
+
+                <MeetingActions
+                  meeting={meeting}
+                  user={user}
+                  onMeetingUpdated={() => {
+                    setRefreshKey((k) => k + 1);
+                  }}
+                />
+              </article>
+            );
+          })}
         </div>
       )}
-    </main>
+    </div>
   );
 }

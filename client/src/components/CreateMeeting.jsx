@@ -47,7 +47,7 @@ export default function CreateMeeting({ user, onMeetingCreated, onCancel }) {
     }
   }, [user]);
 
-  // Fetch customers from existing backend API
+  // Fetch customers from backend API
   useEffect(() => {
     let isMounted = true;
 
@@ -187,87 +187,46 @@ export default function CreateMeeting({ user, onMeetingCreated, onCancel }) {
   }
 
   return (
-    <section
-      style={{
-        border: "1px solid var(--border, #ddd)",
-        borderRadius: "8px",
-        padding: "20px",
-        marginBottom: "24px",
-        textAlign: "left",
-        background: "var(--code-bg, #fcfcfc)",
-        maxWidth: "600px",
-        marginInline: "auto",
-        boxSizing: "border-box",
-      }}
-    >
-      <h2 style={{ marginTop: 0, marginBottom: "16px" }}>Schedule Meeting</h2>
+    <section className="crm-form-card">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px" }}>
+        <div>
+          <h2 style={{ fontSize: "18px", fontWeight: "700", color: "var(--text-primary)" }}>
+            Schedule New Meeting
+          </h2>
+          <p style={{ fontSize: "13px", color: "var(--text-muted)", marginTop: "2px" }}>
+            Create a scheduled sales visit with customer, timeline, and assignment details.
+          </p>
+        </div>
+      </div>
 
       {error && (
-        <p
-          role="alert"
-          style={{
-            color: "#dc2626",
-            background: "rgba(220, 38, 38, 0.1)",
-            padding: "10px 12px",
-            borderRadius: "6px",
-            marginBottom: "14px",
-            fontSize: "14px",
-          }}
-        >
-          {error}
-        </p>
+        <div className="crm-alert crm-alert-error" role="alert">
+          <span>{error}</span>
+        </div>
       )}
 
       {success && (
-        <p
-          role="status"
-          style={{
-            color: "#16a34a",
-            background: "rgba(22, 163, 74, 0.1)",
-            padding: "10px 12px",
-            borderRadius: "6px",
-            marginBottom: "14px",
-            fontSize: "14px",
-          }}
-        >
-          {success}
-        </p>
+        <div className="crm-alert crm-alert-success" role="status">
+          <span>{success}</span>
+        </div>
       )}
 
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: "14px" }}>
-          <label
-            htmlFor="customer"
-            style={{
-              display: "block",
-              fontWeight: "600",
-              marginBottom: "6px",
-              fontSize: "14px",
-              color: "var(--text-h, #111)",
-            }}
-          >
-            Customer *
+        <div className="crm-form-group">
+          <label htmlFor="customer" className="crm-label">
+            Customer Account *
           </label>
           <select
             id="customer"
             name="customer"
+            className="crm-select"
             value={customer}
             onChange={(e) => setCustomer(e.target.value)}
             disabled={loadingCustomers || submitting}
             required
-            style={{
-              width: "100%",
-              padding: "8px 10px",
-              borderRadius: "6px",
-              border: "1px solid var(--border, #ccc)",
-              background: "var(--bg, #fff)",
-              color: "var(--text-h, #111)",
-              fontSize: "14px",
-              boxSizing: "border-box",
-            }}
           >
             <option value="">
-              {loadingCustomers ? "Loading customers..." : "-- Select Customer --"}
+              {loadingCustomers ? "Loading customers..." : "-- Select Customer Account --"}
             </option>
             {customers.map((c) => (
               <option key={c._id} value={c._id}>
@@ -276,208 +235,104 @@ export default function CreateMeeting({ user, onMeetingCreated, onCancel }) {
             ))}
           </select>
           {customerError && (
-            <p
-              role="alert"
-              style={{
-                color: "#dc2626",
-                fontSize: "13px",
-                marginTop: "4px",
-              }}
-            >
+            <p style={{ color: "var(--danger-text)", fontSize: "12.5px", marginTop: "4px" }} role="alert">
               {customerError}
             </p>
           )}
           {!loadingCustomers && customers.length === 0 && !customerError && (
-            <p style={{ fontSize: "13px", color: "var(--text, #666)", marginTop: "4px" }}>
-              No customers found. Please add a customer first.
+            <p style={{ fontSize: "12.5px", color: "var(--text-muted)", marginTop: "4px" }}>
+              No customers found. Please create a customer account first.
             </p>
           )}
         </div>
 
-        <div style={{ marginBottom: "14px" }}>
-          <label
-            htmlFor="purpose"
-            style={{
-              display: "block",
-              fontWeight: "600",
-              marginBottom: "6px",
-              fontSize: "14px",
-              color: "var(--text-h, #111)",
-            }}
-          >
+        <div className="crm-form-group">
+          <label htmlFor="purpose" className="crm-label">
             Meeting Purpose *
           </label>
           <input
             id="purpose"
             name="purpose"
             type="text"
+            className="crm-input"
             value={purpose}
             onChange={(e) => setPurpose(e.target.value)}
-            placeholder="e.g. Product demonstration"
+            placeholder="e.g. Q4 Executive Contract Review"
             disabled={submitting}
             required
-            style={{
-              width: "100%",
-              padding: "8px 10px",
-              borderRadius: "6px",
-              border: "1px solid var(--border, #ccc)",
-              background: "var(--bg, #fff)",
-              color: "var(--text-h, #111)",
-              fontSize: "14px",
-              boxSizing: "border-box",
-            }}
           />
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "12px",
-            marginBottom: "14px",
-          }}
-        >
-          <div style={{ flex: "1 1 220px" }}>
-            <label
-              htmlFor="scheduledStart"
-              style={{
-                display: "block",
-                fontWeight: "600",
-                marginBottom: "6px",
-                fontSize: "14px",
-                color: "var(--text-h, #111)",
-              }}
-            >
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px" }}>
+          <div className="crm-form-group">
+            <label htmlFor="scheduledStart" className="crm-label">
               Start Date & Time *
             </label>
             <input
               id="scheduledStart"
               name="scheduledStart"
               type="datetime-local"
+              className="crm-input"
               value={scheduledStart}
               onChange={(e) => setScheduledStart(e.target.value)}
               disabled={submitting}
               required
-              style={{
-                width: "100%",
-                padding: "8px 10px",
-                borderRadius: "6px",
-                border: "1px solid var(--border, #ccc)",
-                background: "var(--bg, #fff)",
-                color: "var(--text-h, #111)",
-                fontSize: "14px",
-                boxSizing: "border-box",
-              }}
             />
           </div>
 
-          <div style={{ flex: "1 1 220px" }}>
-            <label
-              htmlFor="scheduledEnd"
-              style={{
-                display: "block",
-                fontWeight: "600",
-                marginBottom: "6px",
-                fontSize: "14px",
-                color: "var(--text-h, #111)",
-              }}
-            >
+          <div className="crm-form-group">
+            <label htmlFor="scheduledEnd" className="crm-label">
               End Date & Time *
             </label>
             <input
               id="scheduledEnd"
               name="scheduledEnd"
               type="datetime-local"
+              className="crm-input"
               value={scheduledEnd}
               onChange={(e) => setScheduledEnd(e.target.value)}
               disabled={submitting}
               required
-              style={{
-                width: "100%",
-                padding: "8px 10px",
-                borderRadius: "6px",
-                border: "1px solid var(--border, #ccc)",
-                background: "var(--bg, #fff)",
-                color: "var(--text-h, #111)",
-                fontSize: "14px",
-                boxSizing: "border-box",
-              }}
             />
           </div>
         </div>
 
-        <div style={{ marginBottom: "14px" }}>
-          <label
-            htmlFor="location"
-            style={{
-              display: "block",
-              fontWeight: "600",
-              marginBottom: "6px",
-              fontSize: "14px",
-              color: "var(--text-h, #111)",
-            }}
-          >
+        <div className="crm-form-group">
+          <label htmlFor="location" className="crm-label">
             Location *
           </label>
           <input
             id="location"
             name="location"
             type="text"
+            className="crm-input"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            placeholder="e.g. Client Office / Online"
+            placeholder="e.g. Client HQ (Building 3, 4th Floor) / Virtual Zoom"
             disabled={submitting}
             required
-            style={{
-              width: "100%",
-              padding: "8px 10px",
-              borderRadius: "6px",
-              border: "1px solid var(--border, #ccc)",
-              background: "var(--bg, #fff)",
-              color: "var(--text-h, #111)",
-              fontSize: "14px",
-              boxSizing: "border-box",
-            }}
           />
         </div>
 
-        <div style={{ marginBottom: "14px" }}>
-          <label
-            htmlFor="assignedTo"
-            style={{
-              display: "block",
-              fontWeight: "600",
-              marginBottom: "6px",
-              fontSize: "14px",
-              color: "var(--text-h, #111)",
-            }}
-          >
-            Assigned Employee
+        <div className="crm-form-group">
+          <label htmlFor="assignedTo" className="crm-label">
+            Assigned Sales Representative
           </label>
           {isEmployee ? (
             <div>
               <input
                 id="assignedTo"
                 type="text"
+                className="crm-input"
                 value={
                   currentUser?.name
                     ? `${currentUser.name} (${currentUser.email || "You"})`
                     : currentUser?.email || "Current User"
                 }
                 disabled
-                style={{
-                  width: "100%",
-                  padding: "8px 10px",
-                  borderRadius: "6px",
-                  border: "1px solid var(--border, #ccc)",
-                  background: "var(--code-bg, #eee)",
-                  color: "var(--text, #555)",
-                  fontSize: "14px",
-                  boxSizing: "border-box",
-                }}
               />
-              <span style={{ fontSize: "12px", color: "var(--text, #777)" }}>
-                Employees can only schedule meetings for themselves.
+              <span style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "4px", display: "block" }}>
+                Employees are automatically assigned to their own scheduled visits.
               </span>
             </div>
           ) : (
@@ -486,81 +341,45 @@ export default function CreateMeeting({ user, onMeetingCreated, onCancel }) {
                 id="assignedTo"
                 name="assignedTo"
                 type="text"
+                className="crm-input"
                 value={assignedTo}
                 onChange={(e) => setAssignedTo(e.target.value)}
                 placeholder="User ID of assigned employee or manager"
                 disabled={submitting}
                 required
-                style={{
-                  width: "100%",
-                  padding: "8px 10px",
-                  borderRadius: "6px",
-                  border: "1px solid var(--border, #ccc)",
-                  background: "var(--bg, #fff)",
-                  color: "var(--text-h, #111)",
-                  fontSize: "14px",
-                  boxSizing: "border-box",
-                }}
               />
-              <span style={{ fontSize: "12px", color: "var(--text, #777)" }}>
+              <span style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "4px", display: "block" }}>
                 {isAdmin
-                  ? "Admins must assign meetings to an employee or manager User ID."
+                  ? "Admins must specify an employee or manager User ID."
                   : "Defaults to your user ID. Can be assigned to yourself or a team member."}
               </span>
             </div>
           )}
         </div>
 
-        <div style={{ marginBottom: "14px" }}>
-          <label
-            htmlFor="notes"
-            style={{
-              display: "block",
-              fontWeight: "600",
-              marginBottom: "6px",
-              fontSize: "14px",
-              color: "var(--text-h, #111)",
-            }}
-          >
-            Notes (Optional)
+        <div className="crm-form-group">
+          <label htmlFor="notes" className="crm-label">
+            Preparation Notes (Optional)
           </label>
           <textarea
             id="notes"
             name="notes"
             rows="3"
+            className="crm-textarea"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Add any agenda notes or meeting preparation details..."
+            placeholder="Key discussion topics, decision makers attending, or collateral required..."
             disabled={submitting}
-            style={{
-              width: "100%",
-              padding: "8px 10px",
-              borderRadius: "6px",
-              border: "1px solid var(--border, #ccc)",
-              background: "var(--bg, #fff)",
-              color: "var(--text-h, #111)",
-              fontSize: "14px",
-              boxSizing: "border-box",
-            }}
           />
         </div>
 
-        <div style={{ display: "flex", gap: "10px", marginTop: "18px" }}>
+        <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
           <button
             type="submit"
             disabled={submitting}
-            style={{
-              padding: "9px 18px",
-              borderRadius: "6px",
-              border: "none",
-              background: "var(--accent, #7c3aed)",
-              color: "#fff",
-              fontWeight: "600",
-              cursor: submitting ? "not-allowed" : "pointer",
-              opacity: submitting ? 0.7 : 1,
-            }}
+            className="crm-btn crm-btn-primary"
           >
-            {submitting ? "Creating meeting..." : "Create Meeting"}
+            {submitting ? "Scheduling..." : "Confirm & Schedule Meeting"}
           </button>
 
           {onCancel && (
@@ -568,14 +387,7 @@ export default function CreateMeeting({ user, onMeetingCreated, onCancel }) {
               type="button"
               onClick={onCancel}
               disabled={submitting}
-              style={{
-                padding: "9px 18px",
-                borderRadius: "6px",
-                border: "1px solid var(--border, #ccc)",
-                background: "transparent",
-                color: "var(--text, #555)",
-                cursor: submitting ? "not-allowed" : "pointer",
-              }}
+              className="crm-btn crm-btn-secondary"
             >
               Cancel
             </button>

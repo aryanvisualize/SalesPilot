@@ -45,7 +45,7 @@ export default function CreateCustomer({ onCustomerCreated, onCancel }) {
 
       const newCustomer = data.customer || data.data?.customer || data;
 
-      setSuccess("Customer created successfully!");
+      setSuccess("Customer account created successfully!");
       setAccountName("");
       setContactPerson("");
       setEmail("");
@@ -62,174 +62,121 @@ export default function CreateCustomer({ onCustomerCreated, onCancel }) {
     }
   }
 
-  const inputStyle = {
-    width: "100%",
-    padding: "8px 10px",
-    borderRadius: "6px",
-    border: "1px solid var(--border, #ccc)",
-    background: "var(--bg, #fff)",
-    color: "var(--text-h, #111)",
-    fontSize: "14px",
-    boxSizing: "border-box",
-  };
-
-  const labelStyle = {
-    display: "block",
-    fontWeight: "600",
-    marginBottom: "6px",
-    fontSize: "14px",
-    color: "var(--text-h, #111)",
-  };
-
   return (
-    <section
-      style={{
-        border: "1px solid var(--border, #ddd)",
-        borderRadius: "8px",
-        padding: "20px",
-        marginBottom: "24px",
-        textAlign: "left",
-        background: "var(--code-bg, #fcfcfc)",
-        maxWidth: "600px",
-        marginInline: "auto",
-        boxSizing: "border-box",
-      }}
-    >
-      <h2 style={{ marginTop: 0, marginBottom: "16px" }}>Add New Customer</h2>
+    <section className="crm-form-card">
+      <div style={{ marginBottom: "18px" }}>
+        <h2 style={{ fontSize: "18px", fontWeight: "700", color: "var(--text-primary)" }}>
+          Register New Customer Account
+        </h2>
+        <p style={{ fontSize: "13px", color: "var(--text-muted)", marginTop: "2px" }}>
+          Add account details and point of contact to schedule visits.
+        </p>
+      </div>
 
       {error && (
-        <p
-          role="alert"
-          style={{
-            color: "#dc2626",
-            background: "rgba(220, 38, 38, 0.1)",
-            padding: "10px 12px",
-            borderRadius: "6px",
-            marginBottom: "14px",
-            fontSize: "14px",
-          }}
-        >
-          {error}
-        </p>
+        <div className="crm-alert crm-alert-error" role="alert">
+          <span>{error}</span>
+        </div>
       )}
 
       {success && (
-        <p
-          role="status"
-          style={{
-            color: "#16a34a",
-            background: "rgba(22, 163, 74, 0.1)",
-            padding: "10px 12px",
-            borderRadius: "6px",
-            marginBottom: "14px",
-            fontSize: "14px",
-          }}
-        >
-          {success}
-        </p>
+        <div className="crm-alert crm-alert-success" role="status">
+          <span>{success}</span>
+        </div>
       )}
 
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: "14px" }}>
-          <label htmlFor="accountName" style={labelStyle}>
+        <div className="crm-form-group">
+          <label htmlFor="accountName" className="crm-label">
             Account / Company Name *
           </label>
           <input
             id="accountName"
             name="accountName"
             type="text"
+            className="crm-input"
             value={accountName}
             onChange={(e) => setAccountName(e.target.value)}
             placeholder="e.g. Acme Corporation"
             required
             disabled={submitting}
-            style={inputStyle}
           />
         </div>
 
-        <div style={{ marginBottom: "14px" }}>
-          <label htmlFor="contactPerson" style={labelStyle}>
-            Contact Person *
+        <div className="crm-form-group">
+          <label htmlFor="contactPerson" className="crm-label">
+            Primary Contact Person *
           </label>
           <input
             id="contactPerson"
             name="contactPerson"
             type="text"
+            className="crm-input"
             value={contactPerson}
             onChange={(e) => setContactPerson(e.target.value)}
-            placeholder="e.g. Jane Doe"
+            placeholder="e.g. Jane Doe (Procurement Director)"
             required
             disabled={submitting}
-            style={inputStyle}
           />
         </div>
 
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", marginBottom: "14px" }}>
-          <div style={{ flex: "1 1 220px" }}>
-            <label htmlFor="email" style={labelStyle}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px" }}>
+          <div className="crm-form-group">
+            <label htmlFor="email" className="crm-label">
               Email Address
             </label>
             <input
               id="email"
               name="email"
               type="email"
+              className="crm-input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="e.g. contact@acme.com"
+              placeholder="contact@acme.com"
               disabled={submitting}
-              style={inputStyle}
             />
           </div>
 
-          <div style={{ flex: "1 1 220px" }}>
-            <label htmlFor="phone" style={labelStyle}>
+          <div className="crm-form-group">
+            <label htmlFor="phone" className="crm-label">
               Phone Number
             </label>
             <input
               id="phone"
               name="phone"
               type="tel"
+              className="crm-input"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="e.g. +1 555-0199"
+              placeholder="+1 (555) 234-5678"
               disabled={submitting}
-              style={inputStyle}
             />
           </div>
         </div>
 
-        <div style={{ marginBottom: "14px" }}>
-          <label htmlFor="address" style={labelStyle}>
-            Address
+        <div className="crm-form-group">
+          <label htmlFor="address" className="crm-label">
+            Office / Site Address
           </label>
           <textarea
             id="address"
             name="address"
             rows="2"
+            className="crm-textarea"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            placeholder="e.g. 100 Main Street, Suite 200, City, State"
+            placeholder="e.g. 100 Main Street, Suite 400, Chicago, IL"
             disabled={submitting}
-            style={inputStyle}
           />
         </div>
 
-        <div style={{ display: "flex", gap: "10px", marginTop: "18px" }}>
+        <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
           <button
             type="submit"
             disabled={submitting}
-            style={{
-              padding: "9px 18px",
-              borderRadius: "6px",
-              border: "none",
-              background: "var(--accent, #7c3aed)",
-              color: "#fff",
-              fontWeight: "600",
-              cursor: submitting ? "not-allowed" : "pointer",
-              opacity: submitting ? 0.7 : 1,
-            }}
+            className="crm-btn crm-btn-primary"
           >
-            {submitting ? "Creating customer..." : "Create Customer"}
+            {submitting ? "Creating..." : "Save Customer Account"}
           </button>
 
           {onCancel && (
@@ -237,14 +184,7 @@ export default function CreateCustomer({ onCustomerCreated, onCancel }) {
               type="button"
               onClick={onCancel}
               disabled={submitting}
-              style={{
-                padding: "9px 18px",
-                borderRadius: "6px",
-                border: "1px solid var(--border, #ccc)",
-                background: "transparent",
-                color: "var(--text, #555)",
-                cursor: submitting ? "not-allowed" : "pointer",
-              }}
+              className="crm-btn crm-btn-secondary"
             >
               Cancel
             </button>

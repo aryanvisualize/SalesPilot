@@ -205,26 +205,31 @@ export default function MeetingActions({ meeting, user, onMeetingUpdated }) {
   const isBusy = Boolean(loadingAction);
 
   const buttonStyle = {
-    padding: "6px 12px",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "6px",
+    padding: "7px 14px",
     fontSize: "13px",
     fontWeight: "600",
-    borderRadius: "6px",
-    border: "1px solid var(--border, #ccc)",
-    background: "var(--code-bg, #f4f3ec)",
-    color: "var(--text-h, #111)",
+    borderRadius: "var(--radius-sm, 6px)",
+    border: "1px solid var(--border-strong, #cbd5e1)",
+    background: "var(--bg-card, #fff)",
+    color: "var(--text-primary, #0f172a)",
     cursor: isBusy ? "not-allowed" : "pointer",
     opacity: isBusy ? 0.7 : 1,
+    transition: "all var(--transition-fast, 150ms ease)",
   };
 
   const primaryButtonStyle = {
     ...buttonStyle,
-    background: "var(--accent, #aa3bff)",
+    background: "var(--primary, #4f46e5)",
     color: "#fff",
-    border: "none",
+    border: "1px solid transparent",
+    boxShadow: "var(--shadow-xs)",
   };
 
   return (
-    <div style={{ marginTop: "12px", borderTop: "1px solid var(--border, #eee)", paddingTop: "12px" }}>
+    <div style={{ marginTop: "14px", borderTop: "1px solid var(--border-subtle, #e2e8f0)", paddingTop: "14px" }}>
       {error && (
         <p
           role="alert"
