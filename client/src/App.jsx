@@ -1,31 +1,33 @@
-
 import { useEffect, useState } from "react";
+import { apiRequest } from "./services/api";
+import Login from "./pages/Login";
 
 function App() {
   const [apiStatus, setApiStatus] = useState("Checking...");
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/health")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("API request failed");
-        }
-
-        return response.json();
-      })
-      .then((data) => {
+    async function checkApiHealth() {
+      try {
+        const data = await apiRequest("/api/health");
         setApiStatus(data.message);
-      })
-      .catch(() => {
+      } catch (error) {
         setApiStatus("Backend connection failed");
-      });
+        console.error("Health check failed:", error);
+      }
+    }
+
+    checkApiHealth();
   }, []);
+
+  function handleLogin(data) {
+    console.log("Login successful", data);
+    // Next step: store the user and show the dashboard.
+  }
 
   return (
     <main>
-      <h1>SalesPilot</h1>
-      <p>Sales Meeting & Visit Management</p>
       <p>Backend status: {apiStatus}</p>
+      <Login onLogin={handleLogin} />
     </main>
   );
 }
