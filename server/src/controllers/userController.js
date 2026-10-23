@@ -130,3 +130,31 @@ export async function listUsersController(req, res) {
     });
   }
 }
+
+export async function listAssignableUsersController(req, res) {
+  try {
+    const users = await User.find({
+      role: { $in: ["employee", "manager"] },
+    })
+      .select("-password")
+      .sort({ name: 1 });
+
+    return res.status(200).json({
+      success: true,
+      users: users.map((u) => ({
+        id: u._id,
+        _id: u._id,
+        name: u.name,
+        email: u.email,
+        role: u.role,
+      })),
+    });
+  } catch (error) {
+    console.error("List assignable users error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to list assignable users",
+    });
+  }
+}

@@ -18,6 +18,16 @@ export default function CreateMeeting({ user, onMeetingCreated, onCancel }) {
   const [assignedTo, setAssignedTo] = useState(() => {
     return user?.role === "manager" ? user.id || user._id || "" : "";
   });
+  const [assignableUsers, setAssignableUsers] = useState([]);
+  const [assignedToSearch, setAssignedToSearch] = useState(() =>
+    user?.role === "manager"
+      ? `${user.name || "Current User"} (${user.email || "You"})`
+      : ""
+  );
+  const [loadingAssignableUsers, setLoadingAssignableUsers] = useState(
+    user?.role !== "employee"
+  );
+  const [assignableUsersError, setAssignableUsersError] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -34,6 +44,10 @@ export default function CreateMeeting({ user, onMeetingCreated, onCancel }) {
             setFetchedUser(u);
             if (u.role === "manager") {
               setAssignedTo((prev) => prev || u.id || u._id || "");
+              setAssignedToSearch(
+                (prev) =>
+                  prev || `${u.name || "Current User"} (${u.email || "You"})`
+              );
             }
           }
         })
@@ -88,6 +102,56 @@ export default function CreateMeeting({ user, onMeetingCreated, onCancel }) {
   const isEmployee = currentUser?.role === "employee";
   const isAdmin = currentUser?.role === "admin";
   const currentUserId = currentUser?.id || currentUser?._id || "";
+  const matchingAssignableUsers = assignableUsers.filter((candidate) => {
+    const search = assignedToSearch.trim().toLowerCase();
+    return (
+      !search ||
+      candidate.name.toLowerCase().includes(search) ||
+      candidate.email.toLowerCase().includes(search)
+    );
+  });
+
+  useEffect(() => {
+    if (isEmployee || !currentUser) {
+      return;
+    }
+
+    let isMounted = true;
+
+    async function fetchAssignableUsers() {
+      setLoadingAssignableUsers(true);
+      setAssignableUsersError("");
+
+      try {
+        const data = await apiRequest("/api/users/assignees");
+        const list = Array.isArray(data)
+          ? data
+          : data.users || data.data?.users || data.data || [];
+
+        if (!Array.isArray(list)) {
+          throw new Error("Unexpected assignable users API response.");
+        }
+
+        if (isMounted) {
+          setAssignableUsers(list);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setAssignableUsersError(err.message || "Failed to load sales representatives.");
+        }
+      } finally {
+        if (isMounted) {
+          setLoadingAssignableUsers(false);
+        }
+      }
+    }
+
+    fetchAssignableUsers();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentUser, isEmployee]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -174,6 +238,11 @@ export default function CreateMeeting({ user, onMeetingCreated, onCancel }) {
       setNotes("");
       if (!isEmployee) {
         setAssignedTo(currentUser?.role === "manager" ? currentUserId : "");
+        setAssignedToSearch(
+          currentUser?.role === "manager"
+            ? `${currentUser.name || "Current User"} (${currentUser.email || "You"})`
+            : ""
+        );
       }
 
       if (onMeetingCreated) {
@@ -342,16 +411,72 @@ export default function CreateMeeting({ user, onMeetingCreated, onCancel }) {
                 name="assignedTo"
                 type="text"
                 className="crm-input"
-                value={assignedTo}
-                onChange={(e) => setAssignedTo(e.target.value)}
-                placeholder="User ID of assigned employee or manager"
-                disabled={submitting}
+                value={assignedToSearch}
+                onChange={(e) => {
+                  setAssignedToSearch(e.target.value);
+                  setAssignedTo("");
+                }}
+                placeholder={
+                  loadingAssignableUsers
+                    ? "Loading sales representatives..."
+                    : "Search by name or email"
+                }
+                disabled={submitting || loadingAssignableUsers}
                 required
+                autoComplete="off"
               />
+              {assignedToSearch && matchingAssignableUsers.length > 0 && !assignedTo && (
+                <div
+                  style={{
+                    border: "1px solid var(--border-subtle)",
+                    borderRadius: "var(--radius-md)",
+                    marginTop: "4px",
+                    overflow: "hidden",
+                    background: "var(--bg-card)",
+                  }}
+                >
+                  {matchingAssignableUsers.map((candidate) => (
+                    <button
+                      key={candidate.id || candidate._id}
+                      type="button"
+                      onClick={() => {
+                        setAssignedTo(candidate.id || candidate._id);
+                        setAssignedToSearch(`${candidate.name} (${candidate.email})`);
+                      }}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        padding: "9px 12px",
+                        border: "0",
+                        borderBottom: "1px solid var(--border-subtle)",
+                        background: "transparent",
+                        color: "var(--text-primary)",
+                        textAlign: "left",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <strong>{candidate.name}</strong>
+                      <span style={{ display: "block", fontSize: "12px", color: "var(--text-muted)" }}>
+                        {candidate.email} · {candidate.role}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {assignedToSearch && !assignedTo && !loadingAssignableUsers && matchingAssignableUsers.length === 0 && (
+                <span style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "4px", display: "block" }}>
+                  No employee or manager matches that name or email.
+                </span>
+              )}
+              {assignableUsersError && (
+                <p style={{ color: "var(--danger-text)", fontSize: "12.5px", marginTop: "4px" }} role="alert">
+                  {assignableUsersError}
+                </p>
+              )}
               <span style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "4px", display: "block" }}>
                 {isAdmin
-                  ? "Admins must specify an employee or manager User ID."
-                  : "Defaults to your user ID. Can be assigned to yourself or a team member."}
+                  ? "Search and select an employee or manager by name or email."
+                  : "Search and select yourself or a team member by name or email."}
               </span>
             </div>
           )}
