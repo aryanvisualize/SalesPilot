@@ -16,42 +16,15 @@ export default function Dashboard({ user, onNavigate }) {
 
     async function loadStats() {
       try {
-        const [meetingsRes, customersRes, followUpsRes] = await Promise.allSettled([
-          apiRequest("/api/meetings"),
-          apiRequest("/api/customers"),
-          apiRequest("/api/follow-ups"),
-        ]);
-
-        let meetings = [];
-        if (meetingsRes.status === "fulfilled") {
-          const d = meetingsRes.value;
-          meetings = Array.isArray(d) ? d : d.meetings || d.data?.meetings || d.data || [];
-        }
-
-        let customers = [];
-        if (customersRes.status === "fulfilled") {
-          const d = customersRes.value;
-          customers = Array.isArray(d) ? d : d.customers || d.data?.customers || d.data || [];
-        }
-
-        let followUps = [];
-        if (followUpsRes.status === "fulfilled") {
-          const d = followUpsRes.value;
-          followUps = Array.isArray(d) ? d : d.followUps || d.data?.followUps || d.data || [];
-        }
+        const summary = await apiRequest("/api/dashboard/summary");
 
         if (isMounted) {
-          const completed = meetings.filter((m) => m.status === "completed").length;
-          const inProgress = meetings.filter(
-            (m) => m.status === "in_progress" || m.status === "checked_in"
-          ).length;
-
           setStats({
-            meetingsCount: meetings.length,
-            customersCount: customers.length,
-            followUpsCount: followUps.filter((f) => f.status !== "completed").length,
-            completedMeetings: completed,
-            inProgressMeetings: inProgress,
+            meetingsCount: summary.meetingsCount,
+            customersCount: summary.customersCount,
+            followUpsCount: summary.followUpsCount,
+            completedMeetings: summary.completedMeetings,
+            inProgressMeetings: summary.inProgressMeetings,
           });
         }
       } catch (err) {

@@ -77,6 +77,23 @@ All protected endpoints require an `Authorization` header formatted as:
   }
   ```
 
+### Dashboard Summary
+- **Method:** `GET`
+- **Path:** `/api/dashboard/summary`
+- **Access:** Protected (employee, manager, admin)
+- **Response (200):**
+  ```json
+  {
+    "success": true,
+    "meetingsCount": 125,
+    "customersCount": 80,
+    "followUpsCount": 14,
+    "completedMeetings": 92,
+    "inProgressMeetings": 4
+  }
+  ```
+  Counts follow the authenticated user's meeting and follow-up visibility scope.
+
 ---
 
 ## 2. User Management APIs (Admin Only)

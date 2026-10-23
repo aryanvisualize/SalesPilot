@@ -8,6 +8,7 @@ import meetingLifecycleRoutes from "./routes/meetingLifecycleRoutes.js";
 import followUpRoutes from "./routes/followUpRoutes.js";
 import meetingAdminRoutes from "./routes/meetingAdminRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
 
 const app = express();
 
@@ -62,6 +63,7 @@ app.use("/api/follow-ups", followUpRoutes);
 app.use("/api/meetings", meetingAdminRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 app.get("/api/auth/me", protect, (req, res) => {
   res.status(200).json({
